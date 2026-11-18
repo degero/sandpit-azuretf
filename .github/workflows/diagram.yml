@@ -11,6 +11,7 @@ on:
     branches: [main] #This will just find the highest tf env in /environments/<env> and generate 1 diagram
     paths-ignore:
       - "docs/**"
+      - CHANGELOG.md
   workflow_dispatch:
     inputs:
       terraform-directory:

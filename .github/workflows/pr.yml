@@ -68,7 +68,7 @@ jobs:
       environment: ${{ matrix.environment }}
   apply: # Remove false below If you want terraform apply to your first (lowest, normally dev) env on PRs.
     needs: [plan, changes]
-    if: ${{ false && needs.changes.outputs.terraform == 'true' }}
+    if: ${{ needs.changes.outputs.terraform == 'true' && vars.PR_TF_APPLY == 'true' && github.event.pull_request.head.repo.full_name == github.repository }}
     name: Terraform Apply
     permissions:
       contents: read

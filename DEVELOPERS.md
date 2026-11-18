@@ -56,7 +56,7 @@ terraform workspace delete <issuenumber>
 
 ```
 
-See [Release Please](#release-please) below for PR title guidelines.
+See [Conventional commits](#conventional-commits) below for PR title guidelines.
 
 It is recommended to use a workspace for local dev to not interfere with the tfstate used by CI or other devs.
 
@@ -72,9 +72,9 @@ If changing .tf files run:
 terraform fmt -recursive -write
 ```
 
-### Release Please
+### Conventional commits
 
-This repo uses [release-please](https://github.com/googleapis/release-please) to automate versioning and the changelog, which relies on [Conventional Commits](https://www.conventionalcommits.org/). As squash commits to main are enforced, which will drop a commit message using the conventions, please prefix the PR title with these instead:
+This repo uses [git cliff](https://git-cliff.org/) to automate the CHANGELOG.md via , which relies on [Conventional Commits](https://www.conventionalcommits.org/). As squash commits (recommended) to main will drop a commit message using the conventions, please prefix the PR title with these instead:
 
 | Prefix      | Use for                                                 | Version bump                |
 | ----------- | ------------------------------------------------------- | --------------------------- |
@@ -94,7 +94,7 @@ Example: `fix: correct resource attribute mapping for cloud exporters`
 
 ### Breaking Changes
 
-Add `!` after the type (e.g. `feat!:`) in the PR title and a `BREAKING CHANGE:` footer of the PR description as its own paragraph. Ensure there is sufficient details in the BREAKING CHANGE message as this will be picked up by release-please for CHANGELOG.md
+Add `!` after the type (e.g. `feat!:`) in the PR title and a `BREAKING CHANGE:` footer of the PR description as its own paragraph. Ensure there is sufficient details in the BREAKING CHANGE message as this will be picked up for CHANGELOG.md
 
 ### Troubleshooting
 
