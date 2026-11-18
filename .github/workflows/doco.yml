@@ -1,0 +1,81 @@
+name: Generate docs
+
+on:
+  push:
+    branches: [main] #This will just find the highest tf env in /environments/<env> and generate 1 diagram
+    paths-ignore:
+      - "docs/**"
+  workflow_dispatch:
+  workflow_call:
+
+permissions: {}
+
+jobs:
+  docs:
+    name: Generate docs
+    # Skipped in the template repo itself; runs in repos generated from it.
+    if: ${{ !github.event.repository.is_template }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref }}
+          ssh-key: ${{ secrets.DOCO_DEPLOY_KEY }}
+
+      - name: Install terraform-docs
+        env:
+          TERRAFORM_DOCS_VERSION: "0.18.0"
+        run: bash .github/scripts/install-terraform-docs.sh
+
+      - name: Set up Infracost
+        if: hashFiles('environments/**/*.tf') != ''
+        uses: infracost/actions/setup@a5783eb98adc93aa7a0049fce0abb06fdd30770a # v5.0.1
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+      - name: Add environment cost estimates
+        if: hashFiles('environments/**/*.tf') != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs
+          {
+            echo "# Estimated monthly costs"
+            echo
+            echo "| Environment | Estimated monthly cost |"
+            echo "|---|---:|"
+            for dir in environments/*; do
+              [ -d "$dir" ] || continue
+              json_file="$(mktemp)"
+              infracost breakdown --path "$dir" --format json --out-file "$json_file" >/dev/null
+              currency="$(jq -r '.currency // "USD"' "$json_file")"
+              cost="$(jq -r '.totalMonthlyCost // 0' "$json_file")"
+              printf "| \`%s\` | %s %.2f |\n" "${dir##*/}" "$currency" "$cost"
+              rm -f "$json_file"
+            done
+          } > docs/infracost.md
+
+      - name: Generate documentation
+        shell: bash
+        run: bash .github/scripts/generate-docs.sh
+
+      - name: Remove temporary Infracost input
+        run: rm -f docs/infracost.md
+
+      - name: Format generated documentation
+        run: npx prettier --write "docs/**/*.md"
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A docs
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "docs: update terraform docs"
+          git pull --rebase
+          git push

@@ -1,0 +1,79 @@
+name: PR
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "environments/**/*.tf"
+      - "environments/**/*.tfvars"
+      - "environments/**/*.hcl"
+      - "modules/**/*.tf"
+      - "modulegroups/**/*.tf"
+      - ".github/workflows/**"
+      - ".gitleaks.toml"
+      - "README.md"
+
+concurrency:
+  group: terraform-plan-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  checks:
+    name: Checks
+    permissions:
+      id-token: write
+      checks: write
+      contents: read
+      actions: read # for private repo
+      security-events: write
+      pull-requests: write # For test reports
+    uses: ./.github/workflows/checks.yml
+  changes:
+    runs-on: ubuntu-latest
+    name: Terraform changed
+    outputs:
+      terraform: ${{ steps.filter.outputs.terraform }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d #v4.0.3
+        id: filter
+        with:
+          predicate-quantifier: every
+          filters: |
+            terraform:
+              - "**/*.{tf,tfvars,hcl}"
+              - "!**/tests/**"
+              - "!**/*.tftest.hcl"
+              - "!**/*.tfmock.hcl"
+              - "!**/.terraform.lock.hcl"
+  plan:
+    name: Terraform Plan
+    needs: [checks, changes]
+    if: ${{ !github.event.repository.is_template && needs.changes.outputs.terraform == 'true' }}
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+      security-events: write
+    uses: ./.github/workflows/tf-plan.yml
+    strategy:
+      max-parallel: 1
+      matrix:
+        environment: ${{ fromJSON(vars.TF_ENVIRONMENTS) }}
+    with:
+      environment: ${{ matrix.environment }}
+  apply: # Remove false below If you want terraform apply to your first (lowest, normally dev) env on PRs.
+    needs: [plan, changes]
+    if: ${{ false && needs.changes.outputs.terraform == 'true' }}
+    name: Terraform Apply
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/tf-apply.yml
+    with:
+      environment: ${{ fromJSON(vars.TF_ENVIRONMENTS)[0] }} #tf-plan.yml has plan_blob_name but using this deterministic for parallel changes
+      plan_blob_name: ${{ github.repository }}/${{ fromJSON(vars.TF_ENVIRONMENTS)[0] }}/${{ github.run_id }}-${{ github.run_attempt }}/tfplan

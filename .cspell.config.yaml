@@ -1,0 +1,146 @@
+version: "0.2"
+language: "en-GB"
+
+useGitignore: true
+
+ignorePaths:
+  - "**/.terraform/**"
+  - "**/.terraform.lock.hcl"
+  - "**/*.tfstate"
+  - "**/*.tfstate.backup"
+  - "**/*.tfplan"
+  - "**/node_modules/**"
+  - "**/*.lock"
+  - ".git/**"
+
+dictionaries:
+  - "en-gb"
+  - "softwareTerms"
+  - "misc"
+  - "terraform"
+  - "aws"
+  - "bash"
+  - "powershell"
+  - "git"
+  - "npm"
+  - "node"
+
+# Explicitly pin dictionaries per file type rather than relying on
+# extension auto-detection, which isn't reliable for .tf/.ps1.
+overrides:
+  - filename: "**/*.{tf,tfvars}"
+    languageId: terraform
+    dictionaries: ["terraform", "aws"]
+
+  - filename: "**/*.{sh,bash}"
+    languageId: shellscript
+    dictionaries: ["bash"]
+
+  - filename: "**/*.{ps1,psm1,psd1}"
+    languageId: powershell
+    dictionaries: ["powershell"]
+
+  - filename: ".github/workflows/*.{yml,yaml}"
+    dictionaries: ["softwareTerms", "npm", "git"]
+
+# Cut noise from things that look like words but aren't:
+# state serials, hashes, ARNs, long hex/base64 blobs.
+ignoreRegExpList:
+  - "/[a-f0-9]{32,}/gi" # md5/sha hashes
+  - "/arn:aws:[a-zA-Z0-9:/_-]+/g" # AWS ARNs
+  - "/[A-Za-z0-9+/]{40,}={0,2}/g" # base64-ish blobs
+
+words:
+  - actionlint
+  - aks
+  - analyzer
+  - applicationgateways
+  - azapi
+  - aztfexport
+  - bierner
+  - bridgecrew
+  - checkov
+  - cicd
+  - cidr
+  - codeql
+  - containerregistry
+  - cosmosdb
+  - databaseaccounts
+  - dependabot
+  - doco
+  - eastus
+  - eks
+  - esbenp
+  - foxundermoon
+  - functionapp
+  - gitleaks
+  - gke
+  - graphdata
+  - graphfile
+  - graphviz
+  - hashicorp
+  - hotfixes
+  - iam
+  - infracost
+  - kubeconfig
+  - libgvplugin
+  - linters
+  - loadbalancers
+  - managedidentity
+  - modtm
+  - modulegroups
+  - neato
+  - networksecuritygroups
+  - operationalinsights
+  - opentofu
+  - planfile
+  - prepush
+  - preprod
+  - privateendpoints
+  - projectname
+  - projname
+  - psscriptanalyzer
+  - publicipaddresses
+  - pwsh
+  - randomsuffix
+  - renovate
+  - reponame
+  - resourcegroup
+  - resourcegroups
+  - RGPREFIX
+  - routetables
+  - sarif
+  - serverfarms
+  - servicebus
+  - shellcheck
+  - sops
+  - southeastasia
+  - stordersdev
+  - storageaccount
+  - storageaccounts
+  - streetsidesoftware
+  - sttfstate
+  - sttfstateshared
+  - terravision
+  - terraformgraph
+  - tflint
+  - tfinit
+  - tfplans
+  - tfsec
+  - tftest
+  - timonwong
+  - toplevel
+  - trivy
+  - uami
+  - uksouth
+  - umai
+  - userassignedidentities
+  - varfile
+  - vars
+  - virtualmachines
+  - virtualmachinescalesets
+  - virtualnetworks
+  - vpc
+
+ignoreWords: []
+flagWords: []

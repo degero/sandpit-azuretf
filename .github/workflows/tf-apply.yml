@@ -1,0 +1,63 @@
+name: Terraform Apply
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: Deployment environment
+        type: string
+        default: "dev"
+      plan_blob_name:
+        description: TF plan blob name
+        type: string
+
+permissions: {}
+
+jobs:
+  apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}-apply
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      TF_IN_AUTOMATION: "true"
+      TF_PLUGIN_CACHE_DIR: ${{ github.workspace }}/.terraform-cache
+      ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      ARM_USE_OIDC: true
+      WORKING_DIR: ./environments/${{ inputs.environment }}
+      TF_PLAN_STORAGE_ACCOUNT: ${{ vars.TF_PLAN_STORAGE_ACCOUNT }}
+      TF_INPUT: 0
+      TF_VAR_ci_run: "true"
+      PLAN_BLOB_NAME: ${{ inputs.plan_blob_name }}
+
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/tf-setup
+      - uses: ./.github/actions/tf-init
+        with:
+          working_directory: ${{ env.WORKING_DIR }}
+      - name: Azure login
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 #v3.1.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Download plan from blob storage
+        working-directory: ${{ env.WORKING_DIR }}
+        env:
+          TF_PLAN_STORAGE_ACCOUNT: ${{ vars.TF_PLAN_STORAGE_ACCOUNT }}
+          PLAN_BLOB_NAME: ${{ inputs.plan_blob_name }}
+        run: |
+          az storage blob download \
+           --auth-mode login \
+           --account-name "$TF_PLAN_STORAGE_ACCOUNT" \
+           --container-name tfplans \
+           --name "$PLAN_BLOB_NAME" \
+           --file tfplan
+      - name: Terraform Apply
+        working-directory: ${{ env.WORKING_DIR }}
+        run: terraform apply -auto-approve tfplan

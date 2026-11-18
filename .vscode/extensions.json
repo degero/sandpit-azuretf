@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    "4ops.terraform",
+    "hashicorp.terraform",
+    "tflint.tflint",
+    "bridgecrew.checkov",
+    "esbenp.prettier-vscode",
+    "streetsidesoftware.code-spell-checker",
+    "timonwong.shellcheck",
+    "foxundermoon.shell-format",
+    "ms-vscode.powershell",
+    "github.vscode-github-actions",
+    "bierner.markdown-mermaid"
+  ]
+}

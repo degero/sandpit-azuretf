@@ -1,0 +1,39 @@
+name: CodeQL
+
+on:
+  push:
+    branches: ["main"]
+    paths-ignore:
+      - "docs/**"
+  pull_request:
+    branches: ["main"]
+    paths-ignore:
+      - "docs/**"
+  workflow_dispatch:
+  schedule:
+    - cron: "26 2 * * 5"
+
+permissions: {}
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    name: Analyze (${{ matrix.language }})
+    permissions:
+      security-events: write
+      # only required for workflows in private repositories
+      actions: read
+      contents: read
+    strategy:
+      matrix:
+        include:
+          - language: actions
+            build-mode: none
+          # keep/add any other languages you already scan
+    steps:
+      - uses: actions/checkout@v7
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+      - uses: github/codeql-action/analyze@v4

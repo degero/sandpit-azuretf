@@ -1,0 +1,48 @@
+name: Checks
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1" # every Monday 06:00 UTC
+
+permissions: {}
+
+jobs:
+  terraform-validate:
+    name: Validate
+    permissions:
+      contents: read
+      actions: read # for private repo
+    strategy:
+      matrix:
+        environment: ${{ fromJSON(vars.TF_ENVIRONMENTS) }}
+    uses: ./.github/workflows/tf-validate.yml
+    with:
+      environment: ${{ matrix.environment }}
+  terraform-test:
+    name: Test
+    uses: ./.github/workflows/tf-test.yml
+    permissions:
+      id-token: write
+      checks: write
+      contents: read
+      pull-requests: write # For test reports
+  checkov-terraform-static:
+    name: Sec
+    uses: ./.github/workflows/checkov.yml
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+  gitleaks:
+    name: Gitleaks
+    uses: ./.github/workflows/gitleaks.yml
+    permissions:
+      contents: read
+      pull-requests: write
+  trivy:
+    name: Trivy
+    uses: ./.github/workflows/trivy.yml
+    permissions:
+      contents: read
