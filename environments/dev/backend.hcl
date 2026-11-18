@@ -9,7 +9,7 @@
 
 # subscription_id    = "" # only needed if state storage sub_id is different to the deployment sub_id
 # tenant_id          = "" # only needed if state storage sub is in another tenant
-resource_group_name  = "" # eg: rg-tfstate-shared
-storage_account_name = "" # eg: sttfstateshared001
+resource_group_name  = "sandpit-tfstate-dev" # eg: rg-tfstate-shared
+storage_account_name = "sttfstatedeva803de" # eg: sttfstateshared001
 container_name       = "tfstate" # Leave as this
-key                  = "" # app-or-projname/environment/terraform.tfstate eg: helloworld/dev/terraform.tfstate
+key                  = "tfsandpit/dev/terraform.tfstate" # app-or-projname/environment/terraform.tfstate eg: helloworld/dev/terraform.tfstate
