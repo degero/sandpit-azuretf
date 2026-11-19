@@ -33,9 +33,24 @@ jobs:
             build-mode: none
           # keep/add any other languages you already scan
     steps:
+      - name: Check code scanning is available
+        id: codeqlcheck
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          out=$(gh api "repos/${GITHUB_REPOSITORY}/code-scanning/analyses?per_page=1" 2>&1) || true
+          if echo "$out" | grep -qi "not enabled"; then
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Code scanning not enabled for this repo, skipping SARIF upload"
+          else
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/checkout@v7
+        if: ${{ steps.codeqlcheck.outputs.available == 'true' }}
       - uses: github/codeql-action/init@v4
+        if: ${{ steps.codeqlcheck.outputs.available == 'true' }}
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
       - uses: github/codeql-action/analyze@v4
+        if: ${{ steps.codeqlcheck.outputs.available == 'true' }}
