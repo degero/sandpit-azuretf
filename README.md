@@ -1,13 +1,13 @@
 # Azure Terraform Template
 
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/OWNER/REPOSITORY/badge)](https://scorecard.dev/viewer/?uri=github.com/OWNER/REPOSITORY)
-[![CI](https://github.com/OWNER/REPOSITORY/actions/workflows/main.yml/badge.svg)](https://github.com/OWNER/REPOSITORY/actions/workflows/main.yml)
-[![CodeQL](https://github.com/OWNER/REPOSITORY/actions/workflows/codeql.yml/badge.svg)](https://github.com/OWNER/REPOSITORY/actions/workflows/codeql.yml)
-[![CSpell check](https://github.com/OWNER/REPOSITORY/actions/workflows/cspell.yml/badge.svg)](https://github.com/OWNER/REPOSITORY/actions/workflows/cspell.yml)
-[![Lint](https://github.com/OWNER/REPOSITORY/actions/workflows/lint.yml/badge.svg)](https://github.com/OWNER/REPOSITORY/actions/workflows/lint.yml)
-[![Terraform Drift Detection](https://github.com/OWNER/REPOSITORY/actions/workflows/tf-drift.yml/badge.svg)](https://github.com/OWNER/REPOSITORY/actions/workflows/tf-drift.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/degero/sandpit-azuretf/badge)](https://scorecard.dev/viewer/?uri=github.com/degero/sandpit-azuretf)
+[![CI](https://github.com/degero/sandpit-azuretf/actions/workflows/main.yml/badge.svg)](https://github.com/degero/sandpit-azuretf/actions/workflows/main.yml)
+[![CodeQL](https://github.com/degero/sandpit-azuretf/actions/workflows/codeql.yml/badge.svg)](https://github.com/degero/sandpit-azuretf/actions/workflows/codeql.yml)
+[![CSpell check](https://github.com/degero/sandpit-azuretf/actions/workflows/cspell.yml/badge.svg)](https://github.com/degero/sandpit-azuretf/actions/workflows/cspell.yml)
+[![Lint](https://github.com/degero/sandpit-azuretf/actions/workflows/lint.yml/badge.svg)](https://github.com/degero/sandpit-azuretf/actions/workflows/lint.yml)
+[![Terraform Drift Detection](https://github.com/degero/sandpit-azuretf/actions/workflows/tf-drift.yml/badge.svg)](https://github.com/degero/sandpit-azuretf/actions/workflows/tf-drift.yml)
 
-> After creating a repository from this template, replace `OWNER/REPOSITORY` in these above badge > URLs with its GitHub owner and repository name. GitHub does not automatically rewrite
+> After creating a repository from this template, replace `degero/sandpit-azuretf` in these above badge > URLs with its GitHub owner and repository name. GitHub does not automatically rewrite
 > README links when generating a repository from a template.
 
 ## Description

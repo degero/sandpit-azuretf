@@ -59,7 +59,7 @@ jobs:
       contents: read
       pull-requests: write
       security-events: write
-    uses: ./.github/workflows/tf-plan.yml
+    uses: degero/sandpit-azuretf/.github/workflows/tf-plan.yml@main
     strategy:
       max-parallel: 1
       matrix:
@@ -73,7 +73,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: ./.github/workflows/tf-apply.yml
+    uses: degero/sandpit-azuretf/.github/workflows/tf-apply.yml@main
     with:
       environment: ${{ fromJSON(vars.TF_ENVIRONMENTS)[0] }} #tf-plan.yml has plan_blob_name but using this deterministic for parallel changes
       plan_blob_name: ${{ github.repository }}/${{ fromJSON(vars.TF_ENVIRONMENTS)[0] }}/${{ github.run_id }}-${{ github.run_attempt }}/tfplan
