@@ -41,6 +41,7 @@ jobs:
     if: ${{ needs.changed-dirs.outputs.dirs != '[]' }}
     runs-on: ubuntu-latest
     permissions:
+      actions: read # needed by upload-sarif on private repos
       contents: read
       security-events: write
     strategy:
