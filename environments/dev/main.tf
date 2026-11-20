@@ -43,3 +43,16 @@ module "storage" {
 
   tags = local.common_tags
 }
+
+data "azurerm_client_config" "current" {}
+
+module "keyvault" { #test
+  source = "../../modules/secrets/keyvault"
+
+  name      = module.naming.all.key_vault.name_unique
+  parent_id = module.rg.resource_id
+  location  = var.location
+  tenant_id = data.azurerm_client_config.current.tenant_id
+
+  tags = local.common_tags
+}
