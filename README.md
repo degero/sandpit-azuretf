@@ -28,15 +28,26 @@ This template is focused on the terraform and GitHub CICD it is not opinionated 
 ## Key components
 
 - Isolated /environments/env-name root terraform modules to reduce blast radius / increased flexibility
+- Github environments matching tf environments for approval control
 - Isolated terraform federated credentials + 2 UAMI per env (plan,apply) + RBAC to blob storage by environment (tfstate, tfplans containers)
 - Isolated GitHub OIDC and Workload Identity Federation for Terraform AzureRM backend operations (see [ADMINISTRATORS.md](ADMINISTRATORS.md) for details on adjustable OIDC subject)
-- TFPlan artifacts uploaded to blob storage (retention 7 days)
-- Named `/modules` files for easy location in VSCode (instead of lots of main.tf files)
-- Github Workflows with: Linting (tflint,actionlint,prettier), Formatting (terraform fmt), Sec checks (checkov, Gitleaks secret scanning with PR comments and SARIF artifact), Github Environments for workflow approval, Dependabot (terraform, github actions), Doco generation (terraform-docs), Terraform Validate, Drift Detection (automated scheduled checks + issue management)
-- Pre-push githook to validate/format terraform, lint (prettier,actionlint,powershell,shellscript) and checkov (if installed) locally
-- VSCode settings for format on save: markdown / yaml / json(c), powershell
-- Prettier rules for markdown / yaml / json(c)
-- Scripts folder for dev convenience (tfinit) and admin setup Azure terraform infra / github settings.
+
+- TFPlan artifacts uploaded to blob storage tfplans container (retention 7 days) for terraform apply workflows to use
+- Github Workflows with:
+  - Security Checks: Checkov, Trivy, CodeQL(SARIF Artifact option), Gitleaks(PR Comments, SARIF Artifact option)
+  - Dependabot: Terraform, Github Actions
+  - Validation: Terraform Plan (change summary PR comment), Terraform Validate, Drift Detection (scheduled)
+  - Testing: Terraform Test(artifact, PR comment)
+  - Linting: Tflint, Actionlint, Prettier (markdown,yaml,json(c)), Terraform Fmt, Scripts(PSScriptAnalyzer, shellcheck)
+  - Documentation generation: terraform-docs, Infracost monthly-cost estimates, terravision diagram (to /docs)
+  - Changelog generation: git-cliff
+  - Misc: CSpell, OpenSSF Scorecard
+- `terraform.workspace` guard prevents local runs from writing to the CI-owned `default` workspace
+- Atomic modules in `/modules`, composite module groups in `/modulegroups`, and cross-module tests in `/tests`, modules dont use `main.tf` name for easy location in vscode
+- VSCode settings for format on save: terraform, markdown, yaml, json(c), powershell
+- Named Terraform files instead of repeated `main.tf` files for easier discovery in VS Code
+- Dev Container tooling for Terraform, Azure CLI, GitHub CLI, TFLint, Checkov, Trivy, documentation and graph tools, Prettier, CSpell, Gitleaks, ShellCheck, PSScriptAnalyzer, and Actionlint
+- `/scripts` folder for dev convenience (tfinit, tftest) and admin setup Azure terraform infra / github settings.
 
 ## Terraform module structure
 
