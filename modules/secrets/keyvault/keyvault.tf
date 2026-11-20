@@ -48,11 +48,11 @@ module "this" {
 }
 
 output "resource_id" {
-  description = "Resource ID of the storage account."
+  description = "Resource ID of the keyvault account."
   value       = module.this.resource_id
 }
 
 output "name" {
-  description = "Name of the storage account."
+  description = "Name of the keyvault."
   value       = module.this.name
 }
