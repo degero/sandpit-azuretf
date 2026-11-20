@@ -46,7 +46,7 @@ module "storage" {
 
 data "azurerm_client_config" "current" {}
 
-module "keyvault" {
+module "keyvault" { #test
   source = "../../modules/secrets/keyvault"
 
   name      = module.naming.all.keyvault.name_unique
