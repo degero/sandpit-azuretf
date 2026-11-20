@@ -38,6 +38,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+      - name: Create plugin cache dir
+        run: mkdir -p "${TF_PLUGIN_CACHE_DIR:?TF_PLUGIN_CACHE_DIR is not set}"
       - uses: ./.github/actions/tf-setup
       - uses: ./.github/actions/tf-init
         with:

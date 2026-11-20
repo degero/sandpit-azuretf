@@ -20,8 +20,9 @@ jobs:
       TF_PLUGIN_CACHE_DIR: ${{ github.workspace }}/.terraform-cache
     steps:
       - uses: actions/checkout@v7
+      - name: Create plugin cache dir
+        run: mkdir -p "${TF_PLUGIN_CACHE_DIR:?TF_PLUGIN_CACHE_DIR is not set}"
       - uses: ./.github/actions/tf-setup
-      - run: mkdir -p "$TF_PLUGIN_CACHE_DIR"
       - name: Detect Terraform test files
         id: detect
         run: |

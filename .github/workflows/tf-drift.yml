@@ -74,6 +74,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
+      - name: Create plugin cache dir
+        run: mkdir -p "${TF_PLUGIN_CACHE_DIR:?TF_PLUGIN_CACHE_DIR is not set}"
+
       - name: Terraform Init
         uses: ./.github/actions/tf-init
         with:
