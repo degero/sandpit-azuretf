@@ -36,8 +36,8 @@ This template is focused on the terraform and GitHub CICD it is not opinionated 
 - Github Workflows with:
   - Security Checks: Checkov, Trivy, CodeQL(SARIF Artifact option), Gitleaks(PR Comments, SARIF Artifact option)
   - Dependabot: Terraform, Github Actions
-  - Validation: Terraform Plan (change summary PR comment), Terraform Validate, Drift Detection (scheduled)
-  - Testing: Terraform Test(artifact, PR comment)
+  - Validation: Terraform Plan (change summary/failure output PR comment), Terraform Validate, Drift Detection (scheduled)
+  - Testing: Terraform Test(artifact, test summary PR comment)
   - Linting: Tflint, Actionlint, Prettier (markdown,yaml,json(c)), Terraform Fmt, Scripts(PSScriptAnalyzer, shellcheck)
   - Documentation generation: terraform-docs, Infracost monthly-cost estimates, terravision diagram (to /docs)
   - Changelog generation: git-cliff
