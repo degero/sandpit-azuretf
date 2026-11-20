@@ -36,7 +36,7 @@ terraform {
 
 module "this" {
   # version "0.13.1"
-  source = "https://github.com/Azure/terraform-azurerm-avm-res-keyvault-vault?ref=eaad6bb43678dc74edf03c1dad5c60246760aa45"
+  source = "github.com/Azure/terraform-azurerm-avm-res-keyvault-vault?ref=eaad6bb43678dc74edf03c1dad5c60246760aa45"
 
   name      = var.name
   parent_id = var.parent_id
