@@ -56,6 +56,7 @@ jobs:
       pull-requests: write
       security-events: write
     strategy:
+      fail-fast: false # we want to know if plans are failing on any env so run higher env even if lower fails
       max-parallel: 1
       matrix:
         environment: ${{ fromJSON(vars.TF_ENVIRONMENTS) }}
