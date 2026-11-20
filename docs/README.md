@@ -1,6 +1,5 @@
-
-
 ## Diagram
+
 <!-- terraform-diagram:start -->
 
 Auto-generated from Terraform. Do not edit manually.
