@@ -30,6 +30,7 @@ terraform {
   required_providers {
     azapi   = { source = "Azure/azapi" }
     modtm   = { source = "Azure/modtm" }
+    random  = { source = "hashicorp/random" }
     azurerm = { source = "hashicorp/azurerm" }
   }
 }
