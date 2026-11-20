@@ -49,7 +49,7 @@ data "azurerm_client_config" "current" {}
 module "keyvault" {
   source = "../../modules/secrets/keyvault"
 
-  name      = module.naming.all.keyvault.name
+  name      = module.naming.all.key_vault.name_unique
   parent_id = module.rg.resource_id
   location  = var.location
   tenant_id = data.azurerm_client_config.current.tenant_id
