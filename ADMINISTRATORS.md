@@ -67,6 +67,14 @@ This is required for OIDC login. The federated credentials are pinned to `job_wo
 9. **Pull request behaviour (optional).** Pull requests run Terraform plan for every environment but do **not** apply by default. To also apply the lowest (first) environment in `TF_ENVIRONMENTS` on PRs, set the repository variable `PR_TF_APPLY` to `true`. Apply is skipped for PRs from forks, and still runs in the `<env>-apply` GitHub Environment, so any required reviewers there still gate it.
 10. **CHANGELOG.md** In **Github → Settings → General → Pull Requests**, set **Default commit message** to **Pull request title**. Also Delete the current `CHANGELOG.md` from the repo and update `cliff.toml` `commit_preprocessors`, `postprocessors` sections for links to PRs to appear in the `CHANGELOG.md`. Git cliff in changelog.yml workflow runs on `main` and composes `CHANGELOG.md` from PR titles so long as developers follow [Conventional Commits](https://www.conventionalcommits.org/) guidelines, guidance for devs is in [DEVELOPERS.md](DEVELOPERS.md#conventional-commits).
 11. **Code and Dependency Scanning** In **Github → Settings → Advanced Security** turn on **Dependabot → Alerts, Malware Updates, Security updates** and **Code Security → CodeQL Analysis** to make use of the repos dependabot.yml and codeql.yml workflows. The latter is only available in public repos and paid github accounts. CodeQL SARIF upload is disabled by default. To enable, set a repo env var `ENABLE_SARIF_UPLOAD` = `true`.
+12. **Developer access to tfstate and target deployment RGs** If you wish to allow developers to access and run terraform plan in their local environment they will need Contributor access on either a subscription or each target deployment resource group and for each tf state storage "Storage Blob Data Contributor":
+
+    ```
+    az role assignment create \
+    --assignee uid \
+    --role "Storage Blob Data Contributor" \
+    --scope "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Storage/storageAccounts/<storage-account-name>/blobServices/default/containers/tfstate"
+    ```
 
 ### Adding an environment later
 
