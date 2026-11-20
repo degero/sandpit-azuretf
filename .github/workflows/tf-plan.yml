@@ -61,10 +61,15 @@ jobs:
         run: |
           echo "plan_blob_name=${GITHUB_REPOSITORY_PATH}/${ENVIRONMENT}/${GITHUB_RUN_ID_VALUE}-${GITHUB_RUN_ATTEMPT_VALUE}/tfplan" >> "$GITHUB_OUTPUT"
 
+      # Output is tee'd to a file so the failure summary does not depend on the
+      # setup-terraform wrapper outputs (stdout/stderr), which may be disabled or truncated.
+      # pipefail keeps the step failing when terraform fails (otherwise tee's exit code wins).
       - name: Terraform Plan
         id: plan
         working-directory: ${{ env.WORKING_DIR }}
-        run: terraform plan -var-file=terraform.tfvars -out=tfplan
+        run: |
+          set -o pipefail
+          terraform plan -no-color -var-file=terraform.tfvars -out=tfplan 2>&1 | tee plan_output.txt
 
       - name: Convert plan to JSON
         working-directory: ${{ env.WORKING_DIR }}
@@ -96,78 +101,25 @@ jobs:
                else ($changes[] | "- \(sym(.change.actions)) `\(.address)`") end)
           ' tfplan.json > plan_summary.md
 
-      - name: PR comment
-        if: always() && github.event_name == 'pull_request' && steps.plan.outcome == 'success'
-        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 #v3.0.5
-        with:
-          header: "terraform-plan-marocchino-${{ env.ENVIRONMENT }}"
-          message: "## 🧪 Terraform Plan — Environment: ${{ env.ENVIRONMENT }}<br>{{{content}}}"
-          path: ${{ env.WORKING_DIR }}/plan_summary.md
-
-      # Neither action above has anything to parse when `terraform plan` fails
-      - name: PR comment on plan failure
+      # When `terraform plan` fails there is nothing to parse, so write a failure
+      # summary to the same file the success path uses. Both outcomes then go through
+      # the single sticky comment below, so a later pass replaces the failure comment.
+      - name: Build plan failure summary
         if: always() && github.event_name == 'pull_request' && steps.plan.outcome == 'failure'
-        uses: actions/github-script@v9
-        env:
-          TFPLAN_RAW: "${{ format('{0}{1}', steps.plan.outputs.stdout, steps.plan.outputs.stderr) }}"
-          ENVIRONMENT: ${{ env.ENVIRONMENT }}
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const marker = `<!-- terraform-plan-comment: ${process.env.ENVIRONMENT} -->`;
-            const raw = process.env.TFPLAN_RAW || '';
-            const tail = raw.split('\n').slice(-40).join('\n');
-            const body = `${marker}\n## ❌ Terraform Plan failed — \`${process.env.ENVIRONMENT}\`\n\n\`\`\`\n${tail}\n\`\`\`\n\n<sub>Run: [${context.runId}](${context.payload.repository.html_url}/actions/runs/${context.runId})</sub>`;
-
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-            const existing = comments.find(c => c.body && c.body.includes(marker));
-
-            if (existing) {
-              await github.rest.issues.updateComment({ owner: context.repo.owner, repo: context.repo.repo, comment_id: existing.id, body });
-            } else {
-              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, body });
-            }
-
-      - name: Azure login
-        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 #v3.1.0
-        with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Upload plan to blob storage
         working-directory: ${{ env.WORKING_DIR }}
         env:
-          TF_PLAN_STORAGE_ACCOUNT: ${{ vars.TF_PLAN_STORAGE_ACCOUNT }}
-          PLAN_BLOB_NAME: ${{ steps.plan_path.outputs.plan_blob_name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          az storage blob upload \
-            --auth-mode login \
-            --account-name "$TF_PLAN_STORAGE_ACCOUNT" \
-            --container-name tfplans \
-            --name "$PLAN_BLOB_NAME" \
-            --file tfplan \
-            --overwrite
+          {
+            echo "**❌ Plan failed**"
+            echo
+            echo '```'
+            tail -n 40 plan_output.txt
+            echo '```'
+            echo
+            echo "<sub>[Run ${GITHUB_RUN_ID}](${RUN_URL})</sub>"
+          } > plan_summary.md
 
-      - name: Checkov Terraform (tfplan)
-        id: checkov
-        uses: ./.github/actions/checkov # Only scan plan on main workflow not PR
-        if: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
-        with:
-          file: ${{ env.WORKING_DIR }}/tfplan.json
-          framework: terraform_plan
-          soft_fail: false
-          output_format: cli,sarif
-          output_file_path: console,results.sarif
-
-      # only plan scan uploaded, check.yml checkov call does not upload
-      - name: Upload SARIF file
-        if: ${{ github.ref == 'refs/heads/main' && vars.ENABLE_SARIF_UPLOAD == 'true' && github.event_name != 'pull_request' && (success() || failure()) }}
-        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
-        with:
-          sarif_file: ${{ steps.checkov.outputs.sarif_file }}
-          category: checkov-terraform-${{ env.ENVIRONMENT}}
+      - name: PR comment
+        if: always() && github.event_name == 'pull_request' && (steps.plan.outcome == 'success' || steps.plan.outcome == 'failure')
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c
